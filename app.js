@@ -142,7 +142,7 @@ function tile(it, idx) {
 function renderEarn() {
   const list = [...S.challenges].filter(c => c.active !== false).sort((a, b) => a.points - b.points);
   $("#earnList").replaceChildren(el("span", { text: "SO VERDIENST DU PUNKTE" }),
-    ...(list.length ? list.map(c => el("div", {}, el("span", { text: c.name }), el("b", { text: "+" + fmt(c.points) })))
+    ...(list.length ? list.map(c => el("div", {}, el("span", { text: c.name }), el("b", { text: c.points ? "+" + fmt(c.points) : "nach Ansage" })))
       : [el("div", {}, el("span", { text: "Die Challenges stehen bald hier." }))]));
 }
 function renderShop() {
@@ -271,6 +271,17 @@ function renderAdmin() {
   $("#adminOrders").replaceChildren(ordersTable(S.orderFilter === "alle" ? orders : orders.filter(o => o.status === S.orderFilter), true));
   renderPrintJob(orders);
 
+  const open = S.settings.signupOpen === true;
+  const withMail = Object.keys(S.emails).length, joined = S.participants.filter(p => p.uid && !p.is_admin).length;
+  $("#launchState").textContent = (open
+    ? "Der Shop ist freigeschaltet: Alle Broker mit hinterlegter E-Mail können ihr Passwort festlegen."
+    : "Noch nicht freigeschaltet: Nur das Back Office kann sich anmelden.") + ` ${withMail} E-Mails hinterlegt, ${joined} Broker angemeldet.`;
+  $("#syncState").textContent = S.lastSync
+    ? `Letzter Abgleich mit dem Vertriebscontrolling: ${new Date(S.lastSync).toLocaleString("de-DE", { dateStyle: "short", timeStyle: "short" })}`
+    : "Abgleich mit dem Vertriebscontrolling: noch nicht gelaufen.";
+  $("#launchToggle").textContent = open ? "Freischaltung zurücknehmen" : "Shop freischalten";
+  $("#launchToggle").className = "btn small" + (open ? " ghost" : "");
+
   const parts = [...S.participants].sort((a, b) => a.name.localeCompare(b.name, "de"));
   const pOpts = parts.map(p => [p.id, `${p.name} · ${fmt(available(p.id))} P`]);
   fillSelect($("#bookPid"), pOpts, "Bitte wählen");
@@ -335,6 +346,15 @@ async function setStatus(o, status, btn) {
   if (error) { btn.disabled = false; btn.textContent = "Fehler"; btn.title = errText(error); return; }
   await load();
 }
+$("#launchToggle").addEventListener("click", async e => {
+  const btn = e.currentTarget, open = S.settings.signupOpen === true;
+  if (!open && btn.dataset.confirm !== "1") { btn.dataset.confirm = "1"; btn.textContent = "Wirklich für alle freischalten?"; return; }
+  btn.dataset.confirm = ""; btn.disabled = true;
+  const { error } = await S.sb.from("settings").update({ value: { ...S.settings, signupOpen: !open } }).eq("id", "shop");
+  btn.disabled = false;
+  msg("#launchMsg", error ? "Fehler: " + errText(error) : (open ? "Freischaltung zurückgenommen." : "Shop ist freigeschaltet."), error ? "err" : "ok");
+  await load();
+});
 /* ---------- Druckauftrag ---------- */
 const printSku = o => { const it = S.catalog.find(i => i.id === o.item); return it?.sku || (it ? sym(it) : "?"); };
 function printJob(orders) {
@@ -547,6 +567,8 @@ async function load() {
     if (S.isAdmin) {
       const { data } = await sb.rpc("admin_participants");
       S.emails = Object.fromEntries((data || []).filter(r => r.email).map(r => [r.id, r.email]));
+      const { data: snap } = await sb.from("metric_snapshots").select("updated_at").order("updated_at", { ascending: false }).limit(1);
+      S.lastSync = snap?.[0]?.updated_at || null;
     }
     S.loaded = true;
     if (S.tab === "admin" && !S.isAdmin) S.tab = "shop";

@@ -416,6 +416,14 @@ footer span { font-size: 10px; letter-spacing: .3em; color: var(--muted); text-t
   <section id="view-admin" hidden>
     <div class="shead"><span class="eyebrow">Nur für das Back Office</span><h2>Back <i>Office</i></h2></div>
     <div class="panels">
+      <div class="panel wide" id="launchPanel">
+        <h3>Launch &amp; Abgleich</h3>
+        <p class="note" id="launchState">–</p>
+        <p class="note" id="syncState">–</p>
+        <div class="actions"><button class="btn small" type="button" id="launchToggle">Shop freischalten</button></div>
+        <div class="msg" id="launchMsg"></div>
+      </div>
+
       <div class="panel wide">
         <h3>Order-Buch</h3>
         <div class="filters" id="orderFilter"></div>

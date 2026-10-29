@@ -27,6 +27,9 @@ await db.exec(`
 await db.exec(readFileSync(path.join(dir, "schema.sql"), "utf8"));
 await db.exec(readFileSync(path.join(dir, "seed.sql"), "utf8"));
 await db.exec(readFileSync(path.join(dir, "seed.sql"), "utf8")); // zweimal: muss idempotent sein
+await db.exec(readFileSync(path.join(dir, "002_sync_launch.sql"), "utf8"));
+await db.exec(readFileSync(path.join(dir, "002_sync_launch.sql"), "utf8"));
+await db.exec("insert into public.private_config (key, value) values ('sync_token', 'test-token')");
 
 const count = async (t) => (await db.query(`select count(*)::int n from ${t}`)).rows[0].n;
 console.log("Startdaten");
@@ -40,6 +43,9 @@ await throws(() => db.query("insert into auth.users (email) values ('fremd@examp
 await db.query("update public.participants set email = 'tom@example.com' where id = 'tom-ranft'");
 await db.query("update public.participants set email = 'david@example.com' where id = 'david-wengler'");
 const admin = (await db.query("insert into auth.users (email) values ('ARNDT@vertriebsbildungszentrum.de') returning id")).rows[0].id;
+ok(!!admin, "Back Office kann sich vor dem Launch registrieren");
+await throws(() => db.query("insert into auth.users (email) values ('tom@example.com')"), "Vertriebler vor dem Launch gesperrt", "noch nicht freigeschaltet");
+await db.query(`update public.settings set value = value || '{"signupOpen": true}' where id = 'shop'`);
 const tom = (await db.query("insert into auth.users (email) values ('tom@example.com') returning id")).rows[0].id;
 const david = (await db.query("insert into auth.users (email) values ('david@example.com') returning id")).rows[0].id;
 ok((await db.query("select user_id from public.participants where id = 'tom-ranft'")).rows[0].user_id === tom, "Konto wird automatisch mit dem Broker verknüpft");
@@ -114,6 +120,37 @@ await as(admin, "arndt@vertriebsbildungszentrum.de", async () => {
 await as(david, "david@example.com", async () => {
   await q("select public.redeem('king-of-afa', 'L', null, null)");
   await throws(() => q("select public.redeem('king-of-afa', 'M', null, null)"), "zweites Stück bei Bestand 1 gesperrt", "Ausverkauft");
+});
+
+console.log("Abgleich aus dem Vertriebscontrolling");
+await db.query("update public.participants set sheet_name = 'Felix Brade - DVBZ' where id = 'felix-brade'");
+const rows = JSON.stringify([
+  { name: "Tom Ranft", submitted: 10, closings: 2, referrals: 1 },
+  { name: "Felix Brade - DVBZ ", submitted: 5, closings: 0, referrals: 0 },
+  { name: "Unbekannt Person", submitted: 3, closings: 0, referrals: 0 },
+  { name: "", submitted: 0, closings: 0, referrals: 0 }
+]);
+const sumTom = async () => (await q("select coalesce(sum(delta),0)::int s from public.ledger where participant_id = 'tom-ranft' and reason like 'Vertrieb%'"))[0].s;
+await as(null, null, async () => {
+  await throws(() => q("select public.sync_metrics('falsch', '2026-11', $1::jsonb)", [rows]), "falscher Schlüssel abgewiesen", "ungültig");
+  const b = (await q("select public.sync_metrics('test-token', '2026-11', $1::jsonb, true) r", [rows]))[0].r;
+  ok(b.bookings === 0, "Startpunkt (baseline) bucht nichts");
+});
+ok(await sumTom() === 0, "nach Startpunkt keine Vertriebspunkte");
+const rows2 = JSON.stringify([{ name: "Tom Ranft", submitted: 14, closings: 3, referrals: 2 }, { name: "Felix Brade - DVBZ", submitted: 5, closings: 1, referrals: 0 }, { name: "Unbekannt Person", submitted: 4, closings: 0, referrals: 0 }]);
+await as(null, null, async () => {
+  const r = (await q("select public.sync_metrics('test-token', '2026-11', $1::jsonb) r", [rows2]))[0].r;
+  ok(r.bookings === 2 && r.points === 4 + 3 + 2 + 3, "Zuwachs gebucht: Tom 9 P, Felix 3 P → " + JSON.stringify(r));
+  ok(r.unmatched.length === 1 && r.unmatched[0] === "Unbekannt Person", "unbekannte Namen werden gemeldet");
+  const again = (await q("select public.sync_metrics('test-token', '2026-11', $1::jsonb) r", [rows2]))[0].r;
+  ok(again.bookings === 0, "zweiter Lauf ohne neue Zahlen bucht nichts");
+  await throws(() => q("select * from public.metric_snapshots"), "anon sieht keine Stände", "permission denied");
+});
+ok(await sumTom() === 9, "Tom hat 9 Vertriebspunkte (4×1 + 1×3 + 1×2)");
+ok((await q("select reason from public.ledger where participant_id = 'tom-ranft' and reason like 'Vertrieb%'"))[0].reason === "Vertrieb 2026-11: +4 Anträge, +1 Abschlüsse, +1 Empfehlungen", "Buchungstext verständlich");
+await as(tom, "tom@example.com", async () => {
+  await throws(() => q("select * from public.private_config"), "Vertriebler sieht den Abgleich-Schlüssel nicht", "permission denied");
+  ok((await db.query(`update public.settings set value = '{"signupOpen": false}' where id = 'shop'`)).affectedRows === 0, "Vertriebler kann Launch-Schalter nicht umlegen");
 });
 
 console.log("Nicht angemeldet");
