@@ -74,12 +74,13 @@ function render() {
   for (const v of ["shop", "konto", "rangliste", "admin"]) $("#view-" + v).hidden = !inApp || v !== S.tab;
   if (!inApp) $("#drawer").hidden = true;
   renderWallet(); renderNotice(); renderHero(); renderTape();
-  if (!inApp) return;
+  if (!inApp) { revealAll(); return; }
   if (S.tab === "shop") renderShop();
   if (S.tab === "konto") renderKonto();
   if (S.tab === "rangliste") renderBoard();
   if (S.tab === "admin") renderAdmin();
   $("#tab-admin").hidden = !S.isAdmin;
+  revealAll();
 }
 function renderWallet() {
   const p = myPart();
@@ -172,7 +173,7 @@ function renderShop() {
     if (soldOut) label = "Ausverkauft";
     else if (!p) label = "Kein Depot";
     else if (!canAfford) label = `Fehlen ${fmt(it.points - available(p.id))} P`;
-    return el("article", { class: "item" },
+    return el("article", { class: "item", "data-k": it.id },
       tile(it, items.indexOf(it)),
       el("div", { class: "quote" },
         el("span", { class: "sym", text: it.sku || sym(it) }),
@@ -530,14 +531,57 @@ $("#loginForm").addEventListener("submit", async e => {
 });
 $("#logout").addEventListener("click", async () => { await S.sb.auth.signOut(); });
 
+/* ---------- Bewegung ---------- */
+// Alles nur ohne „Bewegung reduzieren“; ohne JS oder Observer bleibt die Seite einfach statisch sichtbar.
+const motionOK = matchMedia("(prefers-reduced-motion: no-preference)").matches;
+const seen = new Set(); // schon gezeigte Kacheln blenden bei Neuaufbau (Sync, Kauf) nicht erneut ein
+const revealer = motionOK && "IntersectionObserver" in window ? new IntersectionObserver(entries => {
+  let n = 0;
+  for (const e of entries) {
+    if (!e.isIntersecting) continue;
+    const t = e.target;
+    t.style.transitionDelay = Math.min(n++, 5) * 90 + "ms";
+    t.addEventListener("transitionend", () => { t.style.transitionDelay = ""; }, { once: true });
+    t.classList.add("in");
+    revealer.unobserve(t);
+    if (t.dataset.k) seen.add(t.dataset.k);
+  }
+}, { rootMargin: "0px 0px -8% 0px" }) : null;
+function revealAll() {
+  if (!revealer) return;
+  for (const e of document.querySelectorAll(".hero h1, .shead h2, .item, .pod, .maison")) {
+    if (e.classList.contains("reveal")) continue;
+    e.classList.add("reveal");
+    if (e.dataset.k && seen.has(e.dataset.k)) e.classList.add("in");
+    else revealer.observe(e);
+  }
+}
+// Hero: Shirt gleitet langsamer als die Seite, das Preisschild pendelt leicht mit
+const heroFig = $(".stage figure"), heroTag = $(".hangtag");
+if (motionOK && heroFig) {
+  let raf = 0;
+  addEventListener("scroll", () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      const y = Math.min(scrollY, 900);
+      heroFig.style.transform = `translateY(${(y * -0.07).toFixed(1)}px)`;
+      if (heroTag) heroTag.style.transform = `rotate(${(9 + Math.min(y * 0.012, 7)).toFixed(2)}deg)`;
+    });
+  }, { passive: true });
+}
+
 /* ---------- Tabs ---------- */
 function showTab(t) {
   if (t === "admin" && !S.isAdmin) t = "shop";
+  const switching = t !== S.tab;
   S.tab = t;
   for (const b of document.querySelectorAll("nav.tabs button")) b.setAttribute("aria-selected", String(b.dataset.tab === t));
   if (t !== "shop") $("#drawer").hidden = true;
   history.replaceState(null, "", t === "shop" ? location.pathname : "#" + t);
-  render();
+  // Weicher Überblendeffekt statt harter Umschaltung, wo der Browser View Transitions kann
+  if (switching && motionOK && document.startViewTransition) document.startViewTransition(render);
+  else render();
 }
 document.querySelectorAll("nav.tabs button").forEach(b => b.addEventListener("click", () => showTab(b.dataset.tab)));
 document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => {

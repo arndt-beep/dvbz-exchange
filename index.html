@@ -172,6 +172,11 @@ main .inner { padding-block: clamp(56px, 8vw, 100px) 72px; }
   .item { transition: transform .6s cubic-bezier(.2,.7,.2,1); }
   .item:hover { transform: translateY(-6px); }
 }
+/* Scroll-Reveal (Klasse setzt app.js nur ohne reduzierte Bewegung): Titel werden aus der Unschärfe scharf, Kacheln gleiten nacheinander ein */
+.reveal { transition: opacity .9s ease, transform 1s cubic-bezier(.2,.7,.2,1), filter 1.2s ease; }
+.reveal:not(.in) { opacity: 0; transform: translateY(26px); }
+h1.reveal:not(.in), h2.reveal:not(.in) { transform: scale(1.04); filter: blur(10px); }
+::view-transition-old(root), ::view-transition-new(root) { animation-duration: .45s; animation-timing-function: ease; }
 .shot .lab { position: absolute; z-index: 1; top: 14px; right: 14px; font-size: 9px; letter-spacing: .34em; text-transform: uppercase; background: rgba(13,43,37,.8); color: var(--cream); padding: 6px 10px; }
 .stamp { position: absolute; z-index: 2; bottom: 14px; left: 14px; font-size: 9px; font-weight: 500; letter-spacing: .34em; color: var(--ink); background: var(--gold); padding: 6px 10px; }
 .tile { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px 18px; text-align: center; }
