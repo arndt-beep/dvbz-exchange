@@ -1,7 +1,7 @@
-// Supabase-Zugang. Beides findest du im Supabase-Dashboard unter Project Settings → API.
-// Der "anon public"-Schlüssel ist für die Website gedacht und darf öffentlich sein.
+// Supabase-Zugang (Project Settings → API Keys → anon public).
+// Der anon-Schlüssel ist für die Website gedacht und darf öffentlich sein; Schutz übernehmen die Rechte in der Datenbank.
 // Den "service_role"-Schlüssel hier NIEMALS eintragen.
 window.DVBZ_CONFIG = {
-  supabaseUrl: "",      // z. B. https://abcdefgh.supabase.co
-  supabaseAnonKey: ""   // anon public key
+  supabaseUrl: "https://tgxgroelyakrqbibbgvn.supabase.co",
+  supabaseAnonKey: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRneGdyb2VseWFrcnFiaWJiZ3ZuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTMyNzU1MzIsImV4cCI6MjEwODg1MTUzMn0.E-8LX2NMdkfxox4qJYO9ALFD5e2NQYuq7uKkRJ2Kp-w"
 };
