@@ -179,7 +179,7 @@ function renderShop() {
         el("span", { class: "px" }, fmt(it.points), el("small", { text: "PUNKTE" })),
         el("h3", { text: it.name })
       ),
-      el("div", { class: "info", text: [it.type, it.color, left != null ? `${left}/${it.stock} verfügbar` : "unlimitiert"].filter(Boolean).join(" · ") }),
+      el("div", { class: "info", text: [it.type, it.color, it.front, left != null ? `${left}/${it.stock} verfügbar` : "unlimitiert"].filter(Boolean).join(" · ") }),
       el("button", { class: "btn", type: "button", disabled: soldOut || !p || !canAfford, text: label, onclick: () => openRedeem(it) })
     );
   }));
