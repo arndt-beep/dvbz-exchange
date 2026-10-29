@@ -29,6 +29,8 @@ await db.exec(readFileSync(path.join(dir, "seed.sql"), "utf8"));
 await db.exec(readFileSync(path.join(dir, "seed.sql"), "utf8")); // zweimal: muss idempotent sein
 await db.exec(readFileSync(path.join(dir, "002_sync_launch.sql"), "utf8"));
 await db.exec(readFileSync(path.join(dir, "002_sync_launch.sql"), "utf8"));
+await db.exec(readFileSync(path.join(dir, "003_sales_period.sql"), "utf8"));
+await db.exec(readFileSync(path.join(dir, "004_start_at_launch.sql"), "utf8"));
 await db.exec("insert into public.private_config (key, value) values ('sync_token', 'test-token')");
 
 const count = async (t) => (await db.query(`select count(*)::int n from ${t}`)).rows[0].n;
@@ -122,6 +124,19 @@ await as(david, "david@example.com", async () => {
   await throws(() => q("select public.redeem('king-of-afa', 'M', null, null)"), "zweites Stück bei Bestand 1 gesperrt", "Ausverkauft");
 });
 
+console.log("Abgleich vor dem Launch");
+await db.query(`update public.settings set value = value || '{"signupOpen": false}' where id = 'shop'`);
+await as(null, null, async () => {
+  const r = (await q(`select public.sync_metrics('test-token', '2026-09', '[{"name":"Tom Ranft","submitted":50,"closings":10,"referrals":5}]'::jsonb) r`))[0].r;
+  ok(r.bookings === 0 && r.baseline === true, "vor dem Launch: nichts gebucht, nur Stand gemerkt");
+});
+await db.query(`update public.settings set value = value || '{"signupOpen": true}' where id = 'shop'`);
+await as(null, null, async () => {
+  const r = (await q(`select public.sync_metrics('test-token', '2026-09', '[{"name":"Tom Ranft","submitted":52,"closings":10,"referrals":5}]'::jsonb) r`))[0].r;
+  ok(r.bookings === 1 && r.points === 2, "nach dem Launch: nur Zuwachs seit Launch (+2 Anträge = 2 P)");
+});
+await db.query("delete from public.ledger where reason like 'Vertrieb 2026-09%'");
+
 console.log("Abgleich aus dem Vertriebscontrolling");
 await db.query("update public.participants set sheet_name = 'Felix Brade - DVBZ' where id = 'felix-brade'");
 const rows = JSON.stringify([
@@ -152,6 +167,16 @@ await as(tom, "tom@example.com", async () => {
   await throws(() => q("select * from public.private_config"), "Vertriebler sieht den Abgleich-Schlüssel nicht", "permission denied");
   ok((await db.query(`update public.settings set value = '{"signupOpen": false}' where id = 'shop'`)).affectedRows === 0, "Vertriebler kann Launch-Schalter nicht umlegen");
 });
+
+console.log("Vertriebsmonat");
+const per = async () => (await q("select value->>'salesPeriod' p, value->>'salesPeriodStart' s from public.settings where id = 'shop'"))[0];
+ok((await per()).p === "2026-11", "Abgleich merkt sich den Vertriebsmonat 2026-11");
+const start1 = (await per()).s;
+await as(null, null, () => q("select public.sync_metrics('test-token', '2026-10', '[]'::jsonb)"));
+ok((await per()).p === "2026-11" && (await per()).s === start1, "älteres Blatt ändert den Vertriebsmonat nicht");
+await as(null, null, () => q("select public.sync_metrics('test-token', '2026-12', '[]'::jsonb)"));
+ok((await per()).p === "2026-12" && (await per()).s !== start1, "neues Blatt startet neuen Vertriebsmonat");
+await throws(() => as(tom, "tom@example.com", () => q("select public.note_sales_period('2030-01')")), "Vertriebler kann den Monat nicht setzen", "permission denied");
 
 console.log("Nicht angemeldet");
 await as(null, null, async () => {

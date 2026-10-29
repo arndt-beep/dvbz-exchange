@@ -39,7 +39,17 @@ function sym(it) {
 const allOrders = () => [...S.orders].sort((a, b) => String(b.at).localeCompare(String(a.at)));
 const balance = pid => S.ledger.filter(l => l.pid === pid).reduce((s, l) => s + (Number(l.delta) || 0), 0);
 const earned = pid => S.ledger.filter(l => l.pid === pid && l.delta > 0).reduce((s, l) => s + l.delta, 0);
-const monthStart = () => { const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString(); };
+// Vertriebsmonat (setzt der Abgleich, sobald ein neues Auswertungsblatt auftaucht), sonst Kalendermonat
+const monthStart = () => {
+  if (S.settings.salesPeriodStart) return new Date(S.settings.salesPeriodStart).toISOString();
+  const d = new Date(); return new Date(d.getFullYear(), d.getMonth(), 1).toISOString();
+};
+const periodLabel = () => {
+  const p = S.settings.salesPeriod;
+  if (!p) return monthName(new Date());
+  const [y, m] = p.split("-").map(Number);
+  return "Vertriebsmonat " + monthName(new Date(y, m - 1, 1));
+};
 const earnedMonth = pid => { const m = monthStart(); return S.ledger.filter(l => l.pid === pid && l.delta > 0 && l.at >= m).reduce((s, l) => s + l.delta, 0); };
 const reserved = pid => allOrders().filter(o => o.pid === pid && o.status === "offen").reduce((s, o) => s + (o.points || 0), 0);
 const available = pid => balance(pid) - reserved(pid);
@@ -216,7 +226,7 @@ function renderKonto() {
   r.replaceChildren(el("div", { class: "statement" },
     el("div", { class: "hd" }, el("h3", { text: p.name }), el("span", {}, "Depotauszug", el("br"), p.team || "DVBZ")),
     el("div", { class: "row" }, el("span", { text: "Gesammelt" }), el("span", { text: "+" + fmt(e) })),
-    el("div", { class: "row" }, el("span", { text: "davon diesen Monat" }), el("span", { text: "+" + fmt(earnedMonth(p.id)) })),
+    el("div", { class: "row" }, el("span", { text: "davon im Vertriebsmonat" }), el("span", { text: "+" + fmt(earnedMonth(p.id)) })),
     el("div", { class: "row" }, el("span", { text: "Eingelöst" }), el("span", { text: fmt(b - e) })),
     el("div", { class: "row" }, el("span", { text: "Reserviert" }), el("span", { text: res ? "-" + fmt(res) : "0" })),
     el("div", { class: "rule" }),
@@ -232,7 +242,7 @@ function nextTierText(e) {
   return n ? `Noch ${fmt(n[0] - e)} P bis ${n[1]}` : "Höchster Rang. Der Wolf.";
 }
 function renderBoard() {
-  $("#boardMonth").textContent = "Börsenparkett · " + monthName(new Date());
+  $("#boardMonth").textContent = "Börsenparkett · " + periodLabel();
   const rows = ranking();
   if (!rows.some(r => r.e > 0)) {
     $("#podium").replaceChildren();
