@@ -6,7 +6,7 @@ const S = {
   catalog: [], participants: [], ledger: [], challenges: [], orders: [], settings: {}, emails: {},
   tab: "shop", filter: "Alle", orderFilter: "offen", redeemItem: null, loginEmail: ""
 };
-const SIZES = { "Oversize-Shirt": ["S","M","L","XL","XXL"], "Hoodie": ["S","M","L","XL","XXL"], "Cap": ["One Size"], "Sticker-Pack": ["–"] };
+const SIZES = { "Oversize-Shirt": ["S","M","L","XL","XXL"], "Hoodie": ["S","M","L","XL","XXL"], "Cap": ["One Size"], "Socken": ["M (ca. 38–42)", "L (ca. 42–46)", "XL (ca. 46–49)"], "Sticker-Pack": ["–"] };
 const STATUS_NEXT = { offen: ["freigegeben","abgelehnt"], freigegeben: ["bestellt"], bestellt: ["geliefert"], geliefert: [], abgelehnt: [] };
 const STATUS_LABEL = { freigegeben: "Freigeben", abgelehnt: "Ablehnen", bestellt: "Bestellt", geliefert: "Geliefert" };
 const $ = s => document.querySelector(s);
