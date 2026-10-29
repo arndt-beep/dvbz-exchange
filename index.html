@@ -1,0 +1,524 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>DVBZ Exchange</title>
+<meta name="robots" content="noindex, nofollow">
+<link rel="icon" href="img/maison-mono.jpg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,500;0,600;1,300;1,500&family=Jost:wght@300;400;500&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: "Maison DVBZ" — Old-Money-Boutique. Smaragd, Creme und Blattgold, klassische Serif, viel Luft. Ein bewusst einziger Look ohne Hell-/Dunkel-Umschaltung, wie im Claude-Design-Canvas. */
+:root {
+  --night: #0d2b25;
+  --deep: #081d19;
+  --vault: #12302a;
+  --felt: #0b241f;
+  --line: rgba(201,164,92,.22);
+  --line-hi: rgba(201,164,92,.45);
+  --cream: #efe3c8;
+  --paper: #f3e6cc;
+  --ink: #0d2b25;
+  --muted: #9fb3a8;
+  --soft: #c9d3cb;
+  --gold: #c9a45c;
+  --gold-hi: #e8cf94;
+  --gold-dk: #8b6f35;
+  --bull: #8fd0a2;
+  --bear: #e07a6a;
+  --serif: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+  --poster: "Cormorant Garamond", Garamond, "Times New Roman", serif;
+  --body: "Jost", "Helvetica Neue", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { background: var(--night); color: var(--cream); margin: 0; }
+body { font-family: var(--body); font-size: 16px; line-height: 1.6; font-weight: 300; }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 10; background: var(--deep); }
+img { max-width: 100%; }
+.gut { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.inner { max-width: 1320px; margin: 0 auto; }
+@media (min-width: 720px) { .gut { padding-left: max(32px, env(safe-area-inset-left, 0px)); padding-right: max(32px, env(safe-area-inset-right, 0px)); } }
+.lattice { background-color: var(--night); background-image: linear-gradient(45deg, rgba(201,164,92,.09) 1px, transparent 1px), linear-gradient(-45deg, rgba(201,164,92,.09) 1px, transparent 1px); background-size: 34px 34px; }
+.lattice-cream { background-color: var(--paper); background-image: linear-gradient(45deg, rgba(13,43,37,.06) 1px, transparent 1px), linear-gradient(-45deg, rgba(13,43,37,.06) 1px, transparent 1px); background-size: 34px 34px; color: var(--ink); }
+.studio { background: radial-gradient(ellipse at 50% 38%, #fbf3e2 0%, #efe0c2 62%, #e3cfa8 100%); }
+.eyebrow { font-size: 11px; letter-spacing: .4em; text-transform: uppercase; color: var(--gold); font-weight: 400; }
+
+/* Laufband */
+.tape { background: var(--deep); color: var(--gold); overflow: hidden; white-space: nowrap; font-family: var(--mono); font-size: 11px; letter-spacing: .16em; border-bottom: 1px solid rgba(201,164,92,.25); }
+.tape .run { display: inline-flex; gap: 48px; padding-block: 9px; padding-left: 24px; }
+.tape .run b { font-weight: 400; }
+.tape .run > span > span:first-of-type { color: var(--cream); }
+.tape .up { color: var(--bull) !important; }
+.tape .down { color: var(--bear) !important; }
+@media (prefers-reduced-motion: no-preference) { .tape .run { animation: tape 70s linear infinite; } }
+@keyframes tape { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+
+/* Kopf */
+.mast { border-bottom: 1px solid var(--line); }
+.mast .inner { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 16px; padding-block: 20px; }
+.mast .claim { font-size: 11px; letter-spacing: .3em; text-transform: uppercase; color: var(--muted); }
+.seal { display: flex; flex-direction: column; align-items: center; gap: 8px; color: var(--cream); }
+.seal .nm { font-family: var(--serif); font-weight: 500; font-size: 22px; letter-spacing: .42em; padding-left: .42em; line-height: 1; }
+.seal small { font-size: 9px; letter-spacing: .5em; padding-left: .5em; color: var(--muted); line-height: 1; }
+.depot { justify-self: end; display: flex; align-items: baseline; gap: 10px; border: 1px solid rgba(201,164,92,.6); padding: 10px 16px; }
+.depot .lbl { font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--muted); }
+.depot .num { font-family: var(--serif); font-size: 26px; font-weight: 600; line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
+.depot .sub { font-size: 11px; letter-spacing: .08em; color: var(--muted); }
+@media (max-width: 760px) {
+  .mast .inner { grid-template-columns: minmax(0, 1fr) auto; }
+  .mast .claim { display: none; }
+  .seal { align-items: flex-start; }
+  .depot { padding: 8px 12px; } .depot .sub { display: none; }
+}
+
+/* Hero */
+.hero { display: flex; flex-wrap: wrap; border-bottom: 1px solid var(--line); }
+.hero .copy { flex: 11 1 520px; min-width: 0; padding: clamp(56px, 8vw, 104px) clamp(20px, 6vw, 96px) clamp(48px, 6vw, 80px); display: flex; flex-direction: column; justify-content: center; gap: 26px; }
+.kicker { display: flex; align-items: center; gap: 14px; font-size: 11px; letter-spacing: .4em; text-transform: uppercase; color: var(--gold); font-weight: 400; }
+.kicker::before { content: ""; width: 40px; height: 1px; background: var(--gold); flex: none; }
+.hero h1 { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(60px, 8.6vw, 136px); line-height: .9; letter-spacing: -.01em; }
+.hero h1 em { font-weight: 300; color: var(--gold); }
+.hero .lede { margin: 0; max-width: 42ch; font-size: 18px; color: var(--soft); }
+.hero .lede b { color: var(--cream); font-weight: 400; }
+.cta { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 6px; }
+.cta button { font-family: var(--body); font-size: 12px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; padding: 18px 30px; cursor: pointer; }
+.cta .gold { background: var(--gold); color: var(--ink); border: 0; }
+.cta .gold:hover { background: var(--gold-hi); }
+.cta .line { background: none; color: var(--cream); border: 1px solid rgba(239,227,200,.4); font-weight: 400; }
+.cta .line:hover { border-color: var(--gold-hi); color: var(--gold-hi); }
+.hero .stage { flex: 9 1 400px; min-width: 0; position: relative; min-height: clamp(460px, 52vw, 680px); display: flex; align-items: center; justify-content: center; padding: 64px 28px; overflow: hidden; }
+.stage .tag { position: absolute; top: 26px; font-size: 10px; letter-spacing: .4em; color: #5d6a62; font-weight: 400; }
+.stage .tag.l { left: 30px; } .stage .tag.r { right: 30px; }
+.stage figure { position: relative; margin: 0; width: min(100%, 420px); }
+.stage figure img { width: 100%; height: auto; display: block; filter: drop-shadow(0 28px 34px rgba(60,40,10,.3)); }
+.hangtag { position: absolute; right: -4px; top: 52%; transform: rotate(9deg); transform-origin: top center; display: flex; flex-direction: column; align-items: center; }
+.hangtag::before { content: ""; width: 1px; height: 46px; background: #8b7346; }
+.hangtag div { background: var(--night); color: var(--cream); width: 92px; padding: 14px 10px 12px; text-align: center; box-shadow: 0 10px 18px rgba(0,0,0,.25); display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.hangtag i { width: 7px; height: 7px; border-radius: 50%; border: 1px solid var(--gold); }
+.hangtag span { font-family: var(--serif); font-size: 13px; letter-spacing: .3em; padding-left: .3em; }
+.hangtag b { font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--gold); line-height: 1; border-top: 1px solid var(--gold); padding-top: 6px; }
+.hangtag small { font-size: 7px; letter-spacing: .3em; }
+
+/* Kennzahlen */
+.board-stats { margin: 0; border-bottom: 1px solid var(--line); }
+.board-stats .inner { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); }
+.board-stats div { padding: 28px 24px; border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.board-stats div:last-child { border-right: 0; }
+.board-stats dt { font-size: 10px; letter-spacing: .36em; text-transform: uppercase; color: var(--muted); font-weight: 400; }
+.board-stats dd { margin: 0; font-family: var(--serif); font-size: 46px; line-height: 1; font-variant-numeric: tabular-nums; overflow-wrap: anywhere; }
+.board-stats dd.gold { color: var(--gold); }
+.board-stats dd.small { font-size: 30px; font-weight: 500; padding-top: 12px; }
+@media (max-width: 600px) {
+  .board-stats .inner { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .board-stats div { padding: 20px 14px; }
+  .board-stats div:nth-child(2n) { border-right: 0; }
+  .board-stats div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+  .board-stats dd { font-size: 36px; }
+  .board-stats dd.small { font-size: 22px; padding-top: 8px; }
+  .hangtag { top: 14%; right: -10px; }
+}
+
+/* Tabs */
+nav.tabs { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; background: rgba(13,43,37,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+nav.tabs .inner { display: flex; justify-content: center; gap: clamp(8px, 3vw, 34px); overflow-x: auto; }
+nav.tabs button { font-family: var(--body); font-size: 12px; font-weight: 400; letter-spacing: .26em; text-transform: uppercase; background: none; color: var(--cream); border: 0; border-bottom: 1px solid transparent; padding: 18px 4px 16px; cursor: pointer; white-space: nowrap; }
+nav.tabs button[aria-selected="true"] { color: var(--gold); border-bottom-color: var(--gold); }
+nav.tabs button:hover:not([aria-selected="true"]) { color: var(--gold-hi); }
+button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible { outline: 1px solid var(--gold-hi); outline-offset: 3px; }
+
+main .inner { padding-block: clamp(56px, 8vw, 100px) 72px; }
+.notice { border: 1px solid var(--line); padding: 14px 18px; color: var(--muted); margin-bottom: 32px; font-size: 14px; text-align: center; }
+.notice strong { color: var(--cream); font-weight: 400; }
+
+/* Abschnittskopf */
+.shead { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 14px; margin-bottom: 44px; }
+.shead h2 { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(42px, 5vw, 72px); line-height: 1; }
+.shead h2 i { color: var(--gold); }
+.filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 6px; }
+.chip { font-family: var(--body); font-size: 11px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; border: 1px solid var(--line-hi); background: none; color: var(--cream); padding: 9px 16px; cursor: pointer; }
+.chip:hover { border-color: var(--gold-hi); }
+.chip[aria-pressed="true"] { border-color: var(--gold); color: var(--ink); background: var(--gold); }
+#view-admin .filters, #view-rangliste .chip { justify-content: flex-start; }
+
+/* Kollektion */
+.grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 56px 28px; }
+.item { display: flex; flex-direction: column; min-width: 0; }
+.cert { position: relative; }
+.shot, .tile { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border: 1px solid rgba(201,164,92,.35); background: var(--felt); }
+.shot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; transition: opacity .5s ease, transform .8s ease; }
+.shot img.alt { opacity: 0; }
+.item:hover .shot img.alt, .item:focus-within .shot img.alt { opacity: 1; }
+@media (prefers-reduced-motion: no-preference) { .item:hover .shot img { transform: scale(1.025); } }
+.shot .lab { position: absolute; z-index: 1; top: 14px; right: 14px; font-size: 9px; letter-spacing: .34em; text-transform: uppercase; background: rgba(13,43,37,.8); color: var(--cream); padding: 6px 10px; }
+.stamp { position: absolute; z-index: 2; bottom: 14px; left: 14px; font-size: 9px; font-weight: 500; letter-spacing: .34em; color: var(--ink); background: var(--gold); padding: 6px 10px; }
+.tile { display: flex; flex-direction: column; justify-content: center; align-items: center; padding: 30px 18px; text-align: center; }
+.tile .lab { position: absolute; top: 16px; left: 0; right: 0; font-size: 9px; letter-spacing: .34em; text-transform: uppercase; opacity: .75; }
+.tile .ser { position: absolute; bottom: 14px; left: 16px; right: 16px; display: flex; justify-content: space-between; font-family: var(--mono); font-size: 9.5px; letter-spacing: .1em; opacity: .6; }
+.tile .back { font-family: var(--serif); font-weight: 500; line-height: 1; font-size: clamp(28px, 3vw, 38px); overflow-wrap: anywhere; text-wrap: balance; }
+.tile.serif .back { font-style: italic; }
+.tile .front { margin-top: 14px; font-size: 9.5px; letter-spacing: .2em; text-transform: uppercase; opacity: .6; }
+.g-schwarz, .tile { color: var(--cream); }
+.g-offwhite { background: radial-gradient(ellipse at 50% 38%, #fbf3e2, #efe0c2 70%); color: var(--ink); }
+.quote { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 4px 14px; padding: 18px 2px 8px; }
+.quote .sym { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; color: var(--gold); }
+.quote h3 { grid-column: 1; margin: 0; font-family: var(--serif); font-weight: 500; font-size: 25px; line-height: 1.1; text-wrap: balance; }
+.quote .px { grid-column: 2; grid-row: 1 / span 2; text-align: right; font-family: var(--serif); font-weight: 600; font-size: 30px; line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; align-self: end; }
+.quote .px small { display: block; font-family: var(--body); font-weight: 400; font-size: 9px; letter-spacing: .34em; color: var(--muted); margin-top: 4px; }
+.item .quote { flex: 1 0 auto; }
+.item .info { font-size: 12px; letter-spacing: .08em; color: var(--muted); padding: 12px 2px 14px; border-top: 1px solid var(--line); margin-top: 8px; }
+.btn { font-family: var(--body); font-size: 11px; font-weight: 500; letter-spacing: .3em; text-transform: uppercase; background: var(--gold); color: var(--ink); border: 1px solid var(--gold); padding: 14px 18px; cursor: pointer; }
+.btn:hover { background: var(--gold-hi); border-color: var(--gold-hi); }
+.btn[disabled] { background: transparent; color: var(--muted); border-color: var(--line); cursor: not-allowed; }
+.btn.ghost { background: none; color: var(--cream); border-color: rgba(239,227,200,.35); font-weight: 400; }
+.btn.ghost:hover { border-color: var(--gold-hi); color: var(--gold-hi); }
+.btn.small { padding: 8px 12px; font-size: 10px; letter-spacing: .22em; }
+.btn.danger { background: none; color: var(--bear); border-color: var(--bear); }
+.empty { color: var(--muted); font-size: 15px; padding: 12px 0; }
+
+/* Maison und Übergabe */
+.maison { display: flex; flex-wrap: wrap; margin-top: clamp(72px, 9vw, 120px); border: 1px solid var(--line); }
+.maison .pic { flex: 11 1 460px; min-width: 0; min-height: 440px; position: relative; overflow: hidden; }
+.maison .pic img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 30% 40%; }
+.maison .txt { flex: 9 1 360px; min-width: 0; background: var(--vault); padding: clamp(36px, 5vw, 72px); display: flex; flex-direction: column; justify-content: center; gap: 20px; }
+.maison .txt img { width: 104px; height: 104px; object-fit: cover; }
+.maison h2, .handover h2 { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(42px, 4.6vw, 66px); line-height: .98; }
+.maison h2 i { color: var(--gold); }
+.maison p { margin: 0; max-width: 40ch; font-size: 17px; color: var(--soft); }
+.maison .soon { font-size: 10px; letter-spacing: .34em; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
+.handover { margin-top: clamp(72px, 9vw, 120px); padding: clamp(48px, 7vw, 96px) clamp(20px, 5vw, 64px); display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start; justify-content: space-between; }
+.handover .l { flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
+.handover .eyebrow { color: var(--gold-dk); font-weight: 500; }
+.handover h2 i { color: var(--gold-dk); }
+.handover p { margin: 0; max-width: 44ch; font-size: 17px; color: #3d4a43; }
+.earn { flex: 0 1 440px; min-width: 0; display: flex; flex-direction: column; }
+.earn > span { font-size: 10px; letter-spacing: .4em; color: var(--gold-dk); padding-bottom: 12px; border-bottom: 1px solid rgba(139,111,53,.45); font-weight: 500; }
+.earn div { display: flex; justify-content: space-between; gap: 14px; padding: 12px 0; border-bottom: 1px solid rgba(139,111,53,.2); }
+.earn div b { font-family: var(--serif); font-size: 22px; font-weight: 600; color: var(--gold-dk); white-space: nowrap; }
+
+/* Order-Ticket */
+.drawer { position: fixed; inset: auto 0 0 0; z-index: 20; background: var(--deep); border-top: 1px solid var(--gold); box-shadow: 0 -24px 40px -20px rgba(0,0,0,.6); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.drawer .inner { padding-block: 22px; display: flex; flex-wrap: wrap; gap: 14px 22px; align-items: flex-end; }
+.drawer h4 { margin: 0; flex-basis: 100%; font-family: var(--serif); font-weight: 500; font-size: 30px; line-height: 1.1; }
+.drawer h4 small { display: block; font-family: var(--body); font-weight: 400; font-size: 10px; letter-spacing: .34em; color: var(--gold); text-transform: uppercase; margin-bottom: 6px; }
+
+/* Formulare */
+.field { display: grid; gap: 6px; min-width: 0; }
+.field label { font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--muted); }
+input, select, textarea { font: inherit; font-weight: 400; color: var(--cream); background: var(--felt); border: 1px solid var(--line-hi); padding: 10px 12px; min-width: 0; width: 100%; border-radius: 0; }
+select option { background: var(--felt); color: var(--cream); }
+.formrow { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; align-items: end; }
+.msg { font-size: 13px; color: var(--muted); min-height: 1.2em; }
+.msg.err { color: var(--bear); }
+.msg.ok { color: var(--bull); }
+
+/* Depot */
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr); gap: 40px; }
+@media (max-width: 800px) { .cols { grid-template-columns: minmax(0, 1fr); } }
+.statement { background: #fbf4e4; color: var(--ink); padding: 28px 26px; font-size: 14px; position: relative; border: 1px solid var(--gold); outline: 1px solid var(--gold); outline-offset: -9px; }
+.statement .hd { display: flex; justify-content: space-between; align-items: start; gap: 10px; border-bottom: 1px solid var(--gold); padding-bottom: 12px; margin-bottom: 12px; }
+.statement h3 { margin: 0; font-family: var(--serif); font-weight: 500; font-style: italic; font-size: 30px; line-height: 1.05; }
+.statement .hd span { font-size: 9px; letter-spacing: .3em; text-transform: uppercase; text-align: right; color: var(--gold-dk); }
+.statement .row { display: flex; justify-content: space-between; gap: 10px; padding: 4px 0; font-variant-numeric: tabular-nums; }
+.statement .rule { border-top: 1px solid rgba(13,43,37,.25); margin-block: 10px; }
+.statement .row.big { font-family: var(--serif); font-weight: 600; font-size: 24px; }
+.statement .rank { margin-top: 16px; display: flex; justify-content: space-between; align-items: center; gap: 10px; font-size: 12px; color: #3d4a43; }
+.statement .rank b { font-family: var(--serif); font-size: 18px; font-weight: 600; color: var(--paper); background: var(--ink); padding: 4px 14px; letter-spacing: .2em; text-transform: uppercase; }
+h2.sec { font-family: var(--serif); font-weight: 400; font-size: 32px; margin: 0 0 12px; }
+.table-wrap { overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: 14px; }
+th { text-align: left; font-size: 10px; letter-spacing: .26em; text-transform: uppercase; color: var(--muted); font-weight: 400; padding: 8px; border-bottom: 1px solid var(--gold); }
+td { padding: 11px 8px; border-bottom: 1px solid var(--line); vertical-align: top; }
+td.num { font-family: var(--mono); text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.plus { color: var(--bull); }
+td.minus { color: var(--bear); }
+td .note { font-size: 12px; color: var(--muted); }
+.status { font-size: 9px; letter-spacing: .24em; text-transform: uppercase; padding: 3px 8px; border: 1px solid currentColor; white-space: nowrap; }
+.st-offen { color: var(--gold); }
+.st-freigegeben { color: var(--cream); }
+.st-bestellt { color: #a9c8e0; }
+.st-geliefert { color: var(--bull); }
+.st-abgelehnt { color: var(--bear); }
+
+/* Top Broker */
+.podium { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--line-hi); border-bottom: 1px solid var(--line-hi); margin-bottom: 28px; }
+@media (max-width: 640px) { .podium { grid-template-columns: minmax(0, 1fr); } }
+.pod { padding: 36px 24px; border-right: 1px solid var(--line); display: flex; flex-direction: column; align-items: center; text-align: center; gap: 6px; }
+.pod:last-child { border-right: 0; }
+.pod.first { background: radial-gradient(ellipse at 50% 38%, #1d4a40 0%, #123a32 60%, #0b241f 100%); order: -1; }
+@media (min-width: 641px) { .pod.first { order: 0; } .podium .pod:nth-child(1) { grid-column: 2; grid-row: 1; } .podium .pod:nth-child(2) { grid-column: 1; grid-row: 1; } .podium .pod:nth-child(3) { grid-column: 3; grid-row: 1; } }
+.pod .pos { font-family: var(--serif); font-size: 15px; font-style: italic; color: var(--muted); }
+.pod.first .pos { color: var(--gold); }
+.pod .who { font-family: var(--serif); font-weight: 500; font-size: 30px; line-height: 1.1; overflow-wrap: anywhere; }
+.pod .score { font-family: var(--serif); font-weight: 600; font-size: 34px; line-height: 1; color: var(--gold); font-variant-numeric: tabular-nums; }
+.pod small { font-size: 10px; letter-spacing: .3em; text-transform: uppercase; color: var(--muted); }
+.board { display: grid; }
+.rankrow { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 13px 4px; border-bottom: 1px solid var(--line); }
+.rankrow .pos { font-family: var(--serif); font-size: 20px; color: var(--muted); font-variant-numeric: tabular-nums; }
+.rankrow .who { font-family: var(--serif); font-size: 21px; font-weight: 500; overflow-wrap: anywhere; }
+.rankrow .who small { display: block; font-family: var(--body); font-weight: 400; font-size: 10px; letter-spacing: .24em; text-transform: uppercase; color: var(--muted); }
+.rankrow .score { font-family: var(--serif); font-weight: 600; font-size: 22px; color: var(--gold); font-variant-numeric: tabular-nums; }
+
+/* Back Office */
+.panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 420px), 1fr)); gap: 24px; }
+.panel { border: 1px solid var(--line); background: var(--vault); padding: 24px; display: grid; gap: 14px; align-content: start; min-width: 0; }
+.panel h3 { margin: 0; font-family: var(--serif); font-weight: 500; font-size: 28px; }
+.panel.wide { grid-column: 1 / -1; }
+.panel .note { margin: 0; color: var(--muted); font-size: 13px; }
+.hits, .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+#printJson { font-family: var(--mono); font-size: 12px; background: var(--felt); }
+
+footer { background: var(--deep); border-top: 1px solid rgba(201,164,92,.25); }
+footer .inner { padding-block: 44px; display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 20px; }
+footer i { font-family: var(--serif); font-weight: 300; font-size: clamp(24px, 3vw, 34px); color: var(--cream); }
+footer span { font-size: 10px; letter-spacing: .3em; color: var(--muted); text-transform: uppercase; }
+[hidden] { display: none !important; }
+/* Anmeldung */
+.login { max-width: 520px; margin: 0 auto; border: 1px solid var(--line-hi); background: var(--vault); padding: clamp(28px, 5vw, 48px); display: grid; gap: 18px; text-align: center; }
+.login h2 { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(36px, 5vw, 52px); line-height: 1; }
+.login h2 i { color: var(--gold); }
+.login p { margin: 0; color: var(--soft); }
+.login form { display: grid; gap: 12px; text-align: left; }
+.login .btn { width: 100%; }
+.linkbtn { background: none; border: 0; color: var(--muted); font: inherit; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; padding: 8px 0; }
+.linkbtn:hover { color: var(--gold-hi); }
+.depot { cursor: pointer; font: inherit; color: inherit; background: none; }
+</style>
+</head>
+<body>
+
+<div class="tape" aria-hidden="true"><div class="run" id="tape"><span><b>DVBZ</b> EXCHANGE · MARKT GEÖFFNET</span></div></div>
+
+<header class="mast gut">
+  <div class="inner">
+    <span class="claim">Maison DVBZ · Est. MMXXVI</span>
+    <div class="seal">
+      <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true"><rect x="0.75" y="0.75" width="32.5" height="32.5" fill="none" stroke="#c9a45c" stroke-width="1"/><rect x="7" y="18" width="3" height="10" fill="#c9a45c"/><rect x="12.5" y="14" width="3" height="14" fill="#c9a45c"/><rect x="18" y="10" width="3" height="18" fill="#c9a45c"/><rect x="23.5" y="6" width="3" height="22" fill="#c9a45c"/></svg>
+      <span class="nm">DVBZ</span>
+      <small>EXCHANGE</small>
+    </div>
+    <button class="depot" type="button" id="walletBtn" aria-label="Mein Depot öffnen">
+      <span class="lbl">Depot</span>
+      <span class="num" id="walletNum">–</span>
+      <span class="sub" id="walletSub">lädt …</span>
+    </button>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="copy lattice">
+    <span class="kicker" id="dropName">Drop I · Gefördert &amp; Gefürchtet</span>
+    <h1>Sell me<br>this <em>Hoodie.</em></h1>
+    <p class="lede">Der interne Merch-Handel des DVBZ. <b>Abschlüsse rein, Drip raus.</b> Punkte aus Challenges sind die einzige Währung, Bargeld nimmt hier niemand an.</p>
+    <div class="cta">
+      <button class="gold" type="button" data-go="shop">Kollektion ansehen</button>
+      <button class="line" type="button" data-go="konto">Mein Depot</button>
+    </div>
+  </div>
+  <div class="stage studio">
+    <span class="tag l">N° 0002 / 0020</span>
+    <span class="tag r">HEAVEN SENT</span>
+    <figure>
+      <img src="img/hero-koafa.webp" alt="Rückenprint King of AfA: Kupferstich mit König auf dem Wolkenthron im Lorbeeroval">
+      <div class="hangtag" aria-hidden="true"><div><i></i><span>DVBZ</span><b>1.000</b><small>PUNKTE</small></div></div>
+    </figure>
+  </div>
+</section>
+
+<dl class="board-stats gut">
+  <div class="inner">
+    <div><dt>Gelistete Titel</dt><dd id="statItems">–</dd></div>
+    <div><dt>Limitierte Stücke</dt><dd class="gold" id="statLimited">–</dd></div>
+    <div><dt>Punkte im Umlauf</dt><dd id="statFloat">–</dd></div>
+    <div><dt>Top Broker</dt><dd class="small" id="statTop">–</dd></div>
+  </div>
+</dl>
+
+<nav class="tabs gut" role="tablist" id="tabs" hidden>
+  <div class="inner">
+    <button role="tab" id="tab-shop" data-tab="shop" aria-selected="true">Kollektion</button>
+    <button role="tab" id="tab-konto" data-tab="konto" aria-selected="false">Mein Depot</button>
+    <button role="tab" id="tab-rangliste" data-tab="rangliste" aria-selected="false">Top Broker</button>
+    <button role="tab" id="tab-admin" data-tab="admin" aria-selected="false" hidden>Back Office</button>
+  </div>
+</nav>
+
+<main class="gut">
+<div class="inner">
+  <div id="globalNotice"></div>
+
+  <section id="view-login" hidden>
+    <div class="login">
+      <span class="eyebrow">Nur für das Team</span>
+      <h2>Zugang zur <i>Börse</i></h2>
+      <p id="loginLede">Melde dich mit deiner Firmen-E-Mail und deinem Passwort an.</p>
+      <form id="loginForm">
+        <div class="field"><label for="loginEmail">E-Mail</label><input id="loginEmail" type="email" autocomplete="email" required placeholder="vorname.nachname@…"></div>
+        <div class="field"><label for="loginPass">Passwort</label><input id="loginPass" type="password" autocomplete="current-password" minlength="8" required></div>
+        <button class="btn" type="submit" id="loginGo">Anmelden</button>
+        <button class="linkbtn" type="button" id="modeSwitch">Zum ersten Mal hier? Passwort festlegen</button>
+      </form>
+      <div class="msg" id="loginMsg"></div>
+    </div>
+  </section>
+
+  <section id="view-shop" hidden>
+    <div class="shead">
+      <span class="eyebrow">Die Kollektion</span>
+      <h2>Gelistete <i>Wertpapiere</i></h2>
+      <div class="filters" id="filters" role="group" aria-label="Sublabel filtern"></div>
+    </div>
+    <div class="grid" id="grid"><p class="empty">Der Markt öffnet …</p></div>
+
+    <div class="maison">
+      <div class="pic"><img src="img/maison-look.jpg" alt="Monogramm-Set aus Hoodie und Shorts im DVBZ-Allover auf einer Riviera-Terrasse" loading="lazy"></div>
+      <div class="txt">
+        <img src="img/maison-mono.jpg" alt="DVBZ-Monogramm in Creme auf Forest" loading="lazy">
+        <span class="eyebrow">La Maison · Limited 20</span>
+        <h2>Das <i>Monogramm.</i></h2>
+        <p>Hoodie und Shorts im DVBZ-Allover: verschlungenes Monogramm, Euro-Vierpass, Lorbeer und Säulen-Signet. Nur für die Top Broker des Quartals.</p>
+        <span class="soon">IN VORBEREITUNG · 2.500 PUNKTE · SET</span>
+      </div>
+    </div>
+
+    <div class="handover lattice-cream">
+      <div class="l">
+        <span class="eyebrow">Die Übergabe</span>
+        <h2>Geliefert wie<br>ein <i>Abschluss.</i></h2>
+        <p>Jede Order wird einzeln gefertigt und gesammelt ins Büro geliefert. Limitierte Teile tragen ihre Seriennummer. Übergeben wird persönlich, vor versammeltem Team.</p>
+      </div>
+      <div class="earn" id="earnList"><span>SO VERDIENST DU PUNKTE</span></div>
+    </div>
+  </section>
+
+  <section id="view-konto" hidden>
+    <div class="cols">
+      <div id="receipt"></div>
+      <div>
+        <h2 class="sec">Meine Orders</h2>
+        <div class="table-wrap" id="myOrders"></div>
+        <h2 class="sec" style="margin-top:36px">Kontobewegungen</h2>
+        <div class="table-wrap" id="myLedger"></div>
+        <button class="linkbtn" type="button" id="logout" style="margin-top:24px">Abmelden</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="view-rangliste" hidden>
+    <div class="shead"><span class="eyebrow" id="boardMonth">Börsenparkett</span><h2>Top <i>Broker</i></h2></div>
+    <div class="podium" id="podium"></div>
+    <div class="board" id="board"></div>
+  </section>
+
+  <section id="view-admin" hidden>
+    <div class="shead"><span class="eyebrow">Nur für das Back Office</span><h2>Back <i>Office</i></h2></div>
+    <div class="panels">
+      <div class="panel wide">
+        <h3>Order-Buch</h3>
+        <div class="filters" id="orderFilter"></div>
+        <div class="table-wrap" id="adminOrders"></div>
+      </div>
+
+      <div class="panel wide" id="printPanel">
+        <h3>Druckauftrag · Printful</h3>
+        <p class="note">Alle freigegebenen Orders als Sammelauftrag. Text kopieren und an Claude geben („Druckauftrag senden“) oder als Datei in <code>druck/auftraege/</code> ablegen. Printful legt daraus einen Entwurf an. Danach hier als bestellt markieren.</p>
+        <div class="table-wrap" id="printSummary"></div>
+        <textarea id="printJson" readonly rows="6" aria-label="Druckauftrag als Text"></textarea>
+        <div class="actions">
+          <button class="btn small" type="button" id="printCopy">Auftrag kopieren</button>
+          <button class="btn small ghost" type="button" id="printDone">Alle als bestellt markieren</button>
+        </div>
+        <div class="msg" id="printMsg"></div>
+      </div>
+
+      <form class="panel" id="bookForm">
+        <h3>Punkte buchen</h3>
+        <div class="field"><label for="bookPid">Broker</label><select id="bookPid" required></select></div>
+        <div class="field"><label for="bookChallenge">Challenge</label><select id="bookChallenge"></select></div>
+        <div class="formrow">
+          <div class="field"><label for="bookPoints">Punkte (minus = Korrektur)</label><input id="bookPoints" type="number" step="10" required></div>
+          <div class="field"><label for="bookReason">Grund</label><input id="bookReason" type="text" maxlength="120" required></div>
+        </div>
+        <button class="btn" type="submit">Buchen</button>
+        <div class="msg" id="bookMsg"></div>
+      </form>
+
+      <form class="panel" id="partForm">
+        <h3 id="partTitle">Broker anlegen</h3>
+        <div class="formrow">
+          <div class="field"><label for="partName">Name</label><input id="partName" type="text" maxlength="60" required placeholder="z. B. Max Mustermann"></div>
+          <div class="field"><label for="partTeam">Team</label><input id="partTeam" type="text" maxlength="40" placeholder="z. B. Team Nord"></div>
+        </div>
+        <div class="field"><label for="partEmail">E-Mail für die Anmeldung</label><input id="partEmail" type="email" maxlength="120" placeholder="vorname.nachname@…"></div>
+        <div class="field"><label for="partAdmin">Rolle</label><select id="partAdmin"><option value="0">Broker</option><option value="1">Back Office</option></select></div>
+        <input type="hidden" id="partId">
+        <div class="msg" id="partLinked">Ohne E-Mail kann die Person sich nicht anmelden. Das Back Office löst dann für sie ein.</div>
+        <div class="actions"><button class="btn" type="submit" id="partGo">Anlegen</button><button class="btn ghost" type="button" id="partReset" hidden>Neu</button></div>
+        <div class="msg" id="partMsg"></div>
+      </form>
+
+      <div class="panel wide">
+        <h3>Broker &amp; Depots</h3>
+        <div class="table-wrap" id="adminParts"></div>
+      </div>
+
+      <form class="panel" id="behalfForm">
+        <h3>Für jemanden ordern</h3>
+        <div class="field"><label for="behalfPid">Broker</label><select id="behalfPid" required></select></div>
+        <div class="formrow">
+          <div class="field"><label for="behalfItem">Titel</label><select id="behalfItem" required></select></div>
+          <div class="field"><label for="behalfSize">Größe</label><select id="behalfSize"></select></div>
+        </div>
+        <button class="btn" type="submit">Order anlegen</button>
+        <div class="msg" id="behalfMsg"></div>
+      </form>
+
+      <form class="panel" id="itemForm">
+        <h3>Titel listen / ändern</h3>
+        <div class="field"><label for="itemEdit">Bestehenden Titel bearbeiten</label><select id="itemEdit"></select></div>
+        <div class="formrow">
+          <div class="field"><label for="itemName">Name</label><input id="itemName" type="text" maxlength="60" required></div>
+          <div class="field"><label for="itemLabel">Sublabel</label><select id="itemLabel"><option>CLOSERS CLUB</option><option>MEMBERS CLUB</option><option>BILDUNGSMAFIA</option><option>HEAVEN SENT</option><option>OLD MONEY</option><option>LA MAISON</option></select></div>
+        </div>
+        <div class="field"><label for="itemBack">Rückenprint (Zeilen mit | trennen)</label><input id="itemBack" type="text" maxlength="120" required></div>
+        <div class="field"><label for="itemFront">Druckposition</label><input id="itemFront" type="text" maxlength="60"></div>
+        <div class="formrow">
+          <div class="field"><label for="itemType">Textil</label><select id="itemType"><option>Oversize-Shirt</option><option>Hoodie</option><option>Cap</option><option>Sticker-Pack</option></select></div>
+          <div class="field"><label for="itemColor">Farbe</label><select id="itemColor"><option>Ivory</option><option>Midnight</option><option>Grey</option><option>Espresso</option><option>Dust</option><option>Forest</option><option>Navy</option></select></div>
+        </div>
+        <div class="formrow">
+          <div class="field"><label for="itemPoints">Punkte</label><input id="itemPoints" type="number" min="0" step="10" required></div>
+          <div class="field"><label for="itemStock">Stückzahl (leer = unbegrenzt)</label><input id="itemStock" type="number" min="0"></div>
+          <div class="field"><label for="itemActive">Im Handel</label><select id="itemActive"><option value="1">Gelistet</option><option value="0">Ausgesetzt</option></select></div>
+        </div>
+        <button class="btn" type="submit">Speichern</button>
+        <div class="msg" id="itemMsg"></div>
+      </form>
+    </div>
+  </section>
+</div>
+</main>
+
+<footer class="gut"><div class="inner"><i>„Nein“ heißt nur „noch nicht“.</i><span>DVBZ Exchange · nur intern · Druck über Print-on-Demand</span></div></footer>
+
+<div class="drawer gut" id="drawer" hidden>
+  <form class="inner" id="redeemForm">
+    <h4 id="drawerTitle"><small>Order-Ticket</small>Einlösen</h4>
+    <div class="field"><label for="redeemSize">Größe</label><select id="redeemSize"></select></div>
+    <div class="field" style="flex:1 1 220px"><label for="redeemNote">Notiz ans Back Office</label><input id="redeemNote" type="text" maxlength="140" placeholder="z. B. Übergabe im Büro Berlin"></div>
+    <div class="actions">
+      <button class="btn" type="submit" id="redeemGo">Order ausführen</button>
+      <button class="btn ghost" type="button" id="redeemCancel">Abbrechen</button>
+    </div>
+    <div class="msg" id="redeemMsg" style="flex-basis:100%"></div>
+  </form>
+</div>
+
+<script src="config.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
