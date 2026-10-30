@@ -476,7 +476,7 @@ $("#itemEdit").addEventListener("change", () => {
   const it = S.catalog.find(i => i.id === $("#itemEdit").value) || {};
   $("#itemName").value = it.name || ""; $("#itemLabel").value = it.label || "CLOSERS CLUB";
   $("#itemBack").value = it.back || ""; $("#itemFront").value = it.front || "";
-  $("#itemType").value = it.type || "Oversize-Shirt"; $("#itemColor").value = it.color || "Ivory";
+  $("#itemType").value = it.type || "Oversize-Shirt"; $("#itemColor").value = it.color || "Bone";
   $("#itemPoints").value = it.points ?? ""; $("#itemStock").value = it.stock ?? ""; $("#itemActive").value = it.active === false ? "0" : "1";
 });
 $("#itemForm").addEventListener("submit", async e => {
