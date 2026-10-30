@@ -212,6 +212,8 @@ h1.reveal:not(.in), h2.reveal:not(.in) { transform: scale(1.04); filter: blur(10
 .maison h2, .handover h2 { margin: 0; font-family: var(--serif); font-weight: 300; font-size: clamp(42px, 4.6vw, 66px); line-height: .98; }
 .maison h2 i { color: var(--gold); }
 .maison p { margin: 0; max-width: 40ch; font-size: 17px; color: var(--soft); }
+.maison.next { margin: 0 0 clamp(48px, 6vw, 80px); }
+.maison.next .pic { min-height: 360px; }
 .maison .soon { font-size: 10px; letter-spacing: .34em; color: var(--muted); border-top: 1px solid var(--line); padding-top: 14px; }
 .handover { margin-top: clamp(72px, 9vw, 120px); padding: clamp(48px, 7vw, 96px) clamp(20px, 5vw, 64px); display: flex; flex-wrap: wrap; gap: 48px; align-items: flex-start; justify-content: space-between; }
 .handover .l { flex: 1 1 360px; min-width: 0; display: flex; flex-direction: column; gap: 18px; }
@@ -396,6 +398,16 @@ footer span { font-size: 10px; letter-spacing: .3em; color: var(--muted); text-t
       <h2>Gelistete <i>Wertpapiere</i></h2>
       <div class="filters" id="filters" role="group" aria-label="Sublabel filtern"></div>
     </div>
+    <div class="maison next">
+      <div class="pic"><img src="img/drop3-teaser.jpg" alt="Verschwommener Blick auf das Hero-Teil des nächsten Drops" loading="lazy"></div>
+      <div class="txt">
+        <span class="eyebrow">Drop 03 · Coming soon</span>
+        <h2>Closer <i>Date.</i></h2>
+        <p>Wall Street, aber mit Stil. Dreizehn neue Teile, darunter ein limitierter Hoodie. Wer jetzt Punkte spart, hat beim Drop die freie Wahl.</p>
+        <span class="soon">ERSCHEINT ANFANG DEZEMBER · HOODIE LIMITED 20</span>
+      </div>
+    </div>
+
     <div class="grid" id="grid"><p class="empty">Der Markt öffnet …</p></div>
 
     <div class="maison">
@@ -514,7 +526,7 @@ footer span { font-size: 10px; letter-spacing: .3em; color: var(--muted); text-t
         <div class="field"><label for="itemEdit">Bestehenden Titel bearbeiten</label><select id="itemEdit"></select></div>
         <div class="formrow">
           <div class="field"><label for="itemName">Name</label><input id="itemName" type="text" maxlength="60" required></div>
-          <div class="field"><label for="itemLabel">Sublabel</label><select id="itemLabel"><option>CLOSERS CLUB</option><option>MEMBERS CLUB</option><option>BILDUNGSMAFIA</option><option>HEAVEN SENT</option><option>OLD MONEY</option><option>LA MAISON</option></select></div>
+          <div class="field"><label for="itemLabel">Sublabel</label><select id="itemLabel"><option>CLOSERS CLUB</option><option>MEMBERS CLUB</option><option>BILDUNGSMAFIA</option><option>HEAVEN SENT</option><option>OLD MONEY</option><option>LA MAISON</option><option>CLOSER DATE</option></select></div>
         </div>
         <div class="field"><label for="itemBack">Rückenprint (Zeilen mit | trennen)</label><input id="itemBack" type="text" maxlength="120" required></div>
         <div class="field"><label for="itemFront">Druckposition</label><input id="itemFront" type="text" maxlength="60"></div>
@@ -550,8 +562,8 @@ footer span { font-size: 10px; letter-spacing: .3em; color: var(--muted); text-t
   </form>
 </div>
 
-<script src="config.js?v=20261030a"></script>
+<script src="config.js?v=20261030b"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="app.js?v=20261030a"></script>
+<script src="app.js?v=20261030b"></script>
 </body>
 </html>
