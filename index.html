@@ -309,12 +309,14 @@ footer span { font-size: 10px; letter-spacing: .3em; color: var(--muted); text-t
 .login p { margin: 0; color: var(--soft); }
 .login form { display: grid; gap: 12px; text-align: left; }
 .login .btn { width: 100%; }
+body.locked .tape, body.locked .hero, body.locked .board-stats { display: none; }
+body.locked main { padding-top: clamp(40px, 8vw, 96px); }
 .linkbtn { background: none; border: 0; color: var(--muted); font: inherit; font-size: 12px; letter-spacing: .2em; text-transform: uppercase; cursor: pointer; padding: 8px 0; }
 .linkbtn:hover { color: var(--gold-hi); }
 .depot { cursor: pointer; font: inherit; color: inherit; background: none; }
 </style>
 </head>
-<body>
+<body class="locked">
 <div class="backdrop" aria-hidden="true"></div>
 
 <div class="tape" aria-hidden="true"><div class="run" id="tape"><span><b>DVBZ</b> EXCHANGE · MARKT GEÖFFNET</span></div></div>
@@ -337,7 +339,7 @@ footer span { font-size: 10px; letter-spacing: .3em; color: var(--muted); text-t
 
 <section class="hero">
   <div class="copy lattice">
-    <span class="kicker" id="dropName">Drop I · Gefördert &amp; Gefürchtet</span>
+    <span class="kicker" id="dropName">Maison DVBZ</span>
     <h1>Sell me<br>this <em>Hoodie.</em></h1>
     <p class="lede">Der interne Merch-Handel des DVBZ. <b>Abschlüsse rein, Drip raus.</b> Punkte aus Challenges sind die einzige Währung, Bargeld nimmt hier niemand an.</p>
     <div class="cta">
@@ -349,7 +351,7 @@ footer span { font-size: 10px; letter-spacing: .3em; color: var(--muted); text-t
     <span class="tag l">N° 0002 / 0020</span>
     <span class="tag r">HEAVEN SENT</span>
     <figure>
-      <img src="img/hero-koafa.webp" alt="Rückenprint King of AfA: Kupferstich mit König auf dem Wolkenthron im Lorbeeroval">
+      <img data-src="img/hero-koafa.webp" alt="Rückenprint: Kupferstich mit König auf dem Wolkenthron im Lorbeeroval">
       <div class="hangtag" aria-hidden="true"><div><i></i><span>DVBZ</span><b>1.000</b><small>PUNKTE</small></div></div>
     </figure>
   </div>
@@ -562,8 +564,8 @@ footer span { font-size: 10px; letter-spacing: .3em; color: var(--muted); text-t
   </form>
 </div>
 
-<script src="config.js?v=20261030b"></script>
+<script src="config.js?v=20261102a"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="app.js?v=20261030b"></script>
+<script src="app.js?v=20261102a"></script>
 </body>
 </html>

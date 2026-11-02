@@ -73,6 +73,8 @@ function render() {
   $("#tabs").hidden = !inApp;
   for (const v of ["shop", "konto", "rangliste", "admin"]) $("#view-" + v).hidden = !inApp || v !== S.tab;
   if (!inApp) $("#drawer").hidden = true;
+  document.body.classList.toggle("locked", !inApp);
+  if (inApp) for (const img of document.querySelectorAll("img[data-src]")) { img.src = img.dataset.src; img.removeAttribute("data-src"); }
   renderWallet(); renderNotice(); renderHero(); renderTape();
   if (!inApp) { revealAll(); return; }
   if (S.tab === "shop") renderShop();
