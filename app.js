@@ -75,7 +75,8 @@ const factorText = p => {
   if (f !== 1) { const last = rookieEnd(p); last.setDate(last.getDate() - 1); return x + " · Rookie-Bonus bis " + dt(last); }
   return x;
 };
-const ranking = () => S.participants.filter(p => p.active !== false && !p.is_admin && (S.board !== "hunter" || !p.hubspot))
+// Vertriebsleitung verkauft nicht selbst und steht deshalb in keiner Wertung
+const ranking = () => S.participants.filter(p => p.active !== false && !p.is_admin && p.team !== "Vertriebsleitung" && (S.board !== "hunter" || !p.hubspot))
   .map(p => ({ p, e: earnedMonth(p.id), total: earned(p.id) })).sort((a, b) => b.e - a.e || b.total - a.total);
 function tier(pts) {
   if (pts >= 3000) return "Wolf";
