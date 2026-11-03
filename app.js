@@ -3,8 +3,8 @@
    und schreibt über Tabellen (Back Office) oder die Server-Funktionen (Einlösen, Status). */
 const S = {
   sb: null, session: null, uid: null, isAdmin: false, offline: false, loaded: false,
-  catalog: [], participants: [], ledger: [], challenges: [], orders: [], settings: {}, emails: {},
-  tab: "shop", filter: "Alle", orderFilter: "offen", redeemItem: null, loginEmail: ""
+  catalog: [], participants: [], ledger: [], challenges: [], orders: [], settings: {}, points: {}, emails: {},
+  tab: "shop", filter: "Alle", orderFilter: "offen", board: "alle", redeemItem: null, loginEmail: ""
 };
 const SIZES = { "Oversize-Shirt": ["S","M","L","XL","XXL"], "Hoodie": ["S","M","L","XL","XXL"], "Cap": ["One Size"], "Socken": ["M (ca. 38–42)", "L (ca. 42–46)", "XL (ca. 46–49)"], "Sticker-Pack": ["–"] };
 const STATUS_NEXT = { offen: ["freigegeben","abgelehnt"], freigegeben: ["bestellt"], bestellt: ["geliefert"], geliefert: [], abgelehnt: [] };
@@ -57,7 +57,25 @@ const myPart = () => S.uid ? S.participants.find(p => p.uid === S.uid) : null;
 const stockLeft = it => (it.stock == null || it.stock === "") ? null : Math.max(0, it.stock - (it.sold || 0));
 const activeItems = () => S.catalog.filter(i => i.active !== false).sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
 // Rangliste: Monatswertung (startet jeden Monat neu), Rang nach Gesamtpunkten
-const ranking = () => S.participants.filter(p => p.active !== false && !p.is_admin)
+// Faktor auf Vertriebspunkte (gleiche Regel wie point_factor in Supabase)
+const rookieEnd = p => {
+  if (!p.start_date) return null;
+  const d = new Date(p.start_date + "T00:00:00");
+  d.setMonth(d.getMonth() + (S.points.rookieMonths ?? 3));
+  return d;
+};
+const factorOf = p => {
+  if (p.hubspot) return S.points.hubspot ?? 0.5;
+  const end = rookieEnd(p);
+  return end && new Date() < end ? (S.points.rookie ?? 1.5) : 1;
+};
+const factorText = p => {
+  const f = factorOf(p), x = "×" + String(f).replace(".", ",");
+  if (p.hubspot) return x + " · Groessig-HubSpot";
+  if (f !== 1) { const last = rookieEnd(p); last.setDate(last.getDate() - 1); return x + " · Rookie-Bonus bis " + dt(last); }
+  return x;
+};
+const ranking = () => S.participants.filter(p => p.active !== false && !p.is_admin && (S.board !== "hunter" || !p.hubspot))
   .map(p => ({ p, e: earnedMonth(p.id), total: earned(p.id) })).sort((a, b) => b.e - a.e || b.total - a.total);
 function tier(pts) {
   if (pts >= 3000) return "Wolf";
@@ -232,6 +250,7 @@ function renderKonto() {
     el("div", { class: "row" }, el("span", { text: "davon im Vertriebsmonat" }), el("span", { text: "+" + fmt(earnedMonth(p.id)) })),
     el("div", { class: "row" }, el("span", { text: "Eingelöst" }), el("span", { text: fmt(b - e) })),
     el("div", { class: "row" }, el("span", { text: "Reserviert" }), el("span", { text: res ? "-" + fmt(res) : "0" })),
+    el("div", { class: "row" }, el("span", { text: "Faktor auf Vertriebspunkte" }), el("span", { text: factorText(p) })),
     el("div", { class: "rule" }),
     el("div", { class: "row big" }, el("span", { text: "Verfügbar" }), el("span", { text: fmt(b - res) + " P" })),
     el("div", { class: "rank" }, el("span", { text: nextTierText(e) }), el("b", { text: tier(e) }))
@@ -244,8 +263,14 @@ function nextTierText(e) {
   const n = steps.find(([t]) => e < t);
   return n ? `Noch ${fmt(n[0] - e)} P bis ${n[1]}` : "Höchster Rang. Der Wolf.";
 }
+const boardTag = p => [p.team, tier(earned(p.id)), factorOf(p) > 1 ? "Rookie ×" + String(factorOf(p)).replace(".", ",") : ""].filter(Boolean).join(" · ");
 function renderBoard() {
   $("#boardMonth").textContent = "Börsenparkett · " + periodLabel();
+  const hunter = S.board === "hunter";
+  $("#boardTitle").replaceChildren("Top ", el("i", { text: hunter ? "Hunter" : "Broker" }));
+  $("#boardNote").textContent = hunter ? "Nur wer ohne Groessig-HubSpot verkauft, also aus der Kaltakquise. Der Beste des Monats bekommt 150 P." : "";
+  $("#boardFilter").replaceChildren(...[["alle", "Alle Broker"], ["hunter", "Hunter-Wertung"]].map(([k, t]) =>
+    el("button", { class: "chip", type: "button", "aria-pressed": String(S.board === k), text: t, onclick: () => { S.board = k; renderBoard(); } })));
   const rows = ranking();
   if (!rows.some(r => r.e > 0)) {
     $("#podium").replaceChildren();
@@ -258,11 +283,11 @@ function renderBoard() {
     el("span", { class: "pos", text: names[i] }),
     el("span", { class: "who", text: r.p.name + me(r.p) }),
     el("span", { class: "score", text: fmt(r.e) + " P" }),
-    el("small", { text: [r.p.team, tier(r.total)].filter(Boolean).join(" · ") })
+    el("small", { text: boardTag(r.p) })
   )));
   $("#board").replaceChildren(...rows.slice(podium.length).map((r, i) => el("div", { class: "rankrow" },
     el("span", { class: "pos", text: String(i + podium.length + 1).padStart(2, "0") }),
-    el("span", { class: "who" }, r.p.name + me(r.p), el("small", { text: [r.p.team, tier(r.total)].filter(Boolean).join(" · ") })),
+    el("span", { class: "who" }, r.p.name + me(r.p), el("small", { text: boardTag(r.p) })),
     el("span", { class: "score", text: fmt(r.e) + " P" })
   )));
 }
@@ -310,10 +335,10 @@ function renderAdmin() {
   if (!parts.length) { tbl.replaceChildren(el("p", { class: "empty", text: "Noch niemand angelegt. Starte mit „Broker anlegen“." })); return; }
   const access = p => p.uid ? "angemeldet" : (S.emails[p.id] ? "eingeladen" : "keine E-Mail");
   tbl.replaceChildren(el("table", {},
-    el("thead", {}, el("tr", {}, ["Name", "Team", "E-Mail", "Zugang", "Gesammelt", "Verfügbar", ""].map(t => el("th", { text: t })))),
+    el("thead", {}, el("tr", {}, ["Name", "Team", "E-Mail", "Zugang", "Faktor", "Gesammelt", "Verfügbar", ""].map(t => el("th", { text: t })))),
     el("tbody", {}, parts.map(p => el("tr", {},
       el("td", { text: p.name + (p.is_admin ? " · Back Office" : "") }), el("td", { text: p.team || "–" }),
-      el("td", { text: S.emails[p.id] || "–" }), el("td", { text: access(p) }),
+      el("td", { text: S.emails[p.id] || "–" }), el("td", { text: access(p) }), el("td", { text: factorText(p) }),
       el("td", { class: "num", text: fmt(earned(p.id)) }),
       el("td", { class: "num", text: fmt(available(p.id)) }),
       el("td", {}, el("div", { class: "actions" },
@@ -429,12 +454,13 @@ $("#bookForm").addEventListener("submit", async e => {
 function editPart(p) {
   $("#partId").value = p.id; $("#partName").value = p.name; $("#partTeam").value = p.team || "";
   $("#partEmail").value = S.emails[p.id] || ""; $("#partAdmin").value = p.is_admin ? "1" : "0";
+  $("#partHubspot").value = p.hubspot ? "1" : "0"; $("#partStart").value = p.start_date || "";
   $("#partTitle").textContent = "Broker bearbeiten"; $("#partGo").textContent = "Speichern"; $("#partReset").hidden = false;
   msg("#partMsg", ""); $("#partForm").scrollIntoView({ behavior: "smooth", block: "center" }); $("#partName").focus();
 }
 function resetPart() {
-  for (const id of ["#partId", "#partName", "#partTeam", "#partEmail"]) $(id).value = "";
-  $("#partAdmin").value = "0";
+  for (const id of ["#partId", "#partName", "#partTeam", "#partEmail", "#partStart"]) $(id).value = "";
+  $("#partAdmin").value = "0"; $("#partHubspot").value = "0";
   $("#partTitle").textContent = "Broker anlegen"; $("#partGo").textContent = "Anlegen"; $("#partReset").hidden = true;
 }
 $("#partReset").addEventListener("click", () => { resetPart(); msg("#partMsg", ""); });
@@ -443,7 +469,8 @@ $("#partForm").addEventListener("submit", async e => {
   const name = $("#partName").value.trim();
   if (!name) return;
   const email = $("#partEmail").value.trim().toLowerCase() || null;
-  const body = { name, team: $("#partTeam").value.trim() || null, email, is_admin: $("#partAdmin").value === "1" };
+  const body = { name, team: $("#partTeam").value.trim() || null, email, is_admin: $("#partAdmin").value === "1",
+    hubspot: $("#partHubspot").value === "1", start_date: $("#partStart").value || null };
   const id = $("#partId").value;
   if (email && Object.entries(S.emails).some(([pid, m]) => m === email && pid !== id)) { msg("#partMsg", "Diese E-Mail gehört schon zu einem anderen Broker.", "err"); return; }
   let error;
@@ -605,11 +632,11 @@ async function load() {
     const sb = S.sb;
     const [cat, parts, led, ch, ord, set] = await Promise.all([
       sb.from("catalog").select("*"),
-      sb.from("participants").select("id, name, team, user_id, is_admin, active"),
+      sb.from("participants").select("id, name, team, user_id, is_admin, active, hubspot, start_date"),
       sb.from("ledger").select("id, participant_id, delta, reason, created_at").order("created_at", { ascending: false }).limit(5000),
       sb.from("challenges").select("*"),
       sb.from("orders").select("*").order("created_at", { ascending: false }),
-      sb.from("settings").select("*").eq("id", "shop").maybeSingle()
+      sb.from("settings").select("*")
     ]);
     const err = [cat, parts, led, ch, ord].find(r => r.error);
     if (err) { console.error(err.error); return; }
@@ -618,7 +645,8 @@ async function load() {
     S.ledger = led.data.map(mapLedger);
     S.challenges = ch.data;
     S.orders = ord.data.map(mapOrder);
-    S.settings = set.data?.value || {};
+    const setting = id => set.data?.find(r => r.id === id)?.value || {};
+    S.settings = setting("shop"); S.points = setting("points");
     S.isAdmin = !!myPart()?.is_admin;
     if (S.isAdmin) {
       const { data } = await sb.rpc("admin_participants");

@@ -146,6 +146,7 @@ main .inner { padding-block: clamp(56px, 8vw, 100px) 72px; }
 .filters { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin-top: 6px; }
 .chip { font-family: var(--body); font-size: 11px; font-weight: 400; letter-spacing: .22em; text-transform: uppercase; border: 1px solid var(--line-hi); background: none; color: var(--cream); padding: 9px 16px; cursor: pointer; }
 .chip:hover { border-color: var(--gold-hi); }
+.boardnote { margin: 4px 0 0; color: var(--soft); font-size: 14px; min-height: 1em; }
 .chip[aria-pressed="true"] { border-color: var(--gold); color: var(--ink); background: var(--gold); }
 #view-admin .filters, #view-rangliste .chip { justify-content: flex-start; }
 
@@ -447,7 +448,8 @@ body.locked main { padding-top: clamp(40px, 8vw, 96px); }
   </section>
 
   <section id="view-rangliste" hidden>
-    <div class="shead"><span class="eyebrow" id="boardMonth">Börsenparkett</span><h2>Top <i>Broker</i></h2></div>
+    <div class="shead"><span class="eyebrow" id="boardMonth">Börsenparkett</span><h2 id="boardTitle">Top <i>Broker</i></h2>
+      <div class="filters" id="boardFilter" role="group" aria-label="Wertung wählen"></div><p class="boardnote" id="boardNote"></p></div>
     <div class="podium" id="podium"></div>
     <div class="board" id="board"></div>
   </section>
@@ -500,7 +502,11 @@ body.locked main { padding-top: clamp(40px, 8vw, 96px); }
           <div class="field"><label for="partTeam">Team</label><input id="partTeam" type="text" maxlength="40" placeholder="z. B. Team Nord"></div>
         </div>
         <div class="field"><label for="partEmail">E-Mail für die Anmeldung</label><input id="partEmail" type="email" maxlength="120" placeholder="vorname.nachname@…"></div>
-        <div class="field"><label for="partAdmin">Rolle</label><select id="partAdmin"><option value="0">Broker</option><option value="1">Back Office</option></select></div>
+        <div class="formrow">
+          <div class="field"><label for="partAdmin">Rolle</label><select id="partAdmin"><option value="0">Broker</option><option value="1">Back Office</option></select></div>
+          <div class="field"><label for="partHubspot">Gruppe</label><select id="partHubspot"><option value="0">Standard</option><option value="1">Groessig-HubSpot (×0,5)</option></select></div>
+        </div>
+        <div class="field"><label for="partStart">Startdatum (erste 3 Monate ×1,5)</label><input id="partStart" type="date"></div>
         <input type="hidden" id="partId">
         <div class="msg" id="partLinked">Ohne E-Mail kann die Person sich nicht anmelden. Das Back Office löst dann für sie ein.</div>
         <div class="actions"><button class="btn" type="submit" id="partGo">Anlegen</button><button class="btn ghost" type="button" id="partReset" hidden>Neu</button></div>
@@ -564,8 +570,8 @@ body.locked main { padding-top: clamp(40px, 8vw, 96px); }
   </form>
 </div>
 
-<script src="config.js?v=20261102a"></script>
+<script src="config.js?v=20261103a"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
-<script src="app.js?v=20261102a"></script>
+<script src="app.js?v=20261103a"></script>
 </body>
 </html>
