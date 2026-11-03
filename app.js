@@ -263,7 +263,7 @@ function nextTierText(e) {
   const n = steps.find(([t]) => e < t);
   return n ? `Noch ${fmt(n[0] - e)} P bis ${n[1]}` : "Höchster Rang. Der Wolf.";
 }
-const boardTag = p => [p.team, tier(earned(p.id)), factorOf(p) > 1 ? "Rookie ×" + String(factorOf(p)).replace(".", ",") : ""].filter(Boolean).join(" · ");
+const boardTag = p => [p.team, tier(earned(p.id)), factorOf(p) > 1 ? "Startbonus ×" + String(factorOf(p)).replace(".", ",") : ""].filter(Boolean).join(" · ");
 function renderBoard() {
   $("#boardMonth").textContent = "Börsenparkett · " + periodLabel();
   const hunter = S.board === "hunter";
