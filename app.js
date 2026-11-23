@@ -50,7 +50,8 @@ const periodLabel = () => {
   const [y, m] = p.split("-").map(Number);
   return "Vertriebsmonat " + monthName(new Date(y, m - 1, 1));
 };
-const earnedMonth = pid => { const m = monthStart(); return S.ledger.filter(l => l.pid === pid && l.delta > 0 && l.at >= m).reduce((s, l) => s + l.delta, 0); };
+// Monatspreise ("Bester … des Monats") gehören zum Vormonat und zählen nicht in die laufende Wertung
+const earnedMonth = pid => { const m = monthStart(); return S.ledger.filter(l => l.pid === pid && l.delta > 0 && l.at >= m && !/des Monats/.test(l.reason || "")).reduce((s, l) => s + l.delta, 0); };
 const reserved = pid => allOrders().filter(o => o.pid === pid && o.status === "offen").reduce((s, o) => s + (o.points || 0), 0);
 const available = pid => balance(pid) - reserved(pid);
 const myPart = () => S.uid ? S.participants.find(p => p.uid === S.uid) : null;
